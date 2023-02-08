@@ -11,17 +11,17 @@ from rest_framework.views import APIView
 
 class TelegramWebhook(APIView):
 	
-	# def post(self, request, token):
-	# 	if token != settings.TELEGRAM_WEBHOOK_TOKEN:
-	# 		return Response(
-	# 			{"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
-	# 			)
+	def post(self, request, token):
+		if token != settings.TELEGRAM_WEBHOOK_TOKEN:
+			return Response(
+				{"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
+				)
 
-	# 	print(request.data)
-	# 	# process_telegram_message(request.data)
-	# 	send_telegram_reply.delay(request.data)
-	# 	return Response({"succes": True})
-
-	def post(self, request):
 		print(request.data)
-		return Response({'success': True})
+		# process_telegram_message(request.data)
+		# send_telegram_reply.delay(request.data)
+		return Response({"succes": True})
+
+	# def post(self, request):
+	# 	print(request.data)
+	# 	return Response({'success': True})

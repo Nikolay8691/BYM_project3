@@ -13,8 +13,8 @@ class Command(BaseCommand):
 
 	def handle(self, *args, **options):
 		root_url = options["root_url"]
-		# webhook_path = reverse("webhooks:telegram_webhook", kwargs = {"token": settings.TELEGRAM_WEBHOOK_TOKEN})
-		webhook_path = reverse("webhooks:telegram_webhook")
+		webhook_path = reverse("webhooks:telegram_webhook", kwargs = {"token": settings.TELEGRAM_WEBHOOK_TOKEN})
+		# webhook_path = reverse("webhooks:telegram_webhook")
 
 		webhook_url = f"{root_url}{webhook_path}"
 
