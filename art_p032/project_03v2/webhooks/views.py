@@ -4,7 +4,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-# from chat.utils import process_telegram_message
+from chat.utils import process_telegram_message
 # from chat.tasks import send_telegram_reply
 
 # Create your views here.
@@ -18,7 +18,7 @@ class TelegramWebhook(APIView):
 				)
 
 		print(request.data)
-		# process_telegram_message(request.data)
+		process_telegram_message(request.data)
 		# send_telegram_reply.delay(request.data)
 		return Response({"succes": True})
 
