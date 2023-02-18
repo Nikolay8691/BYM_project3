@@ -1,10 +1,14 @@
+from pprint import pprint
 import requests
+import json
 
 from django.conf import settings
 
 from .models import TelegramMessage
 
 from .translate import get_translation
+
+# from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 def process_telegram_message(message):
 	name = message["message"]["from"]["first_name"]
@@ -38,5 +42,33 @@ def process_telegram_message(message):
 
 	reply_url = f"https://api.telegram.org/bot{settings.TELEGRAM_API_TOKEN}/sendMessage"
 
+	keyboard_array = [
+		[
+			{'text' : 'option_1', 'callback_data' : 'right'},
+			{'text' : 'option_2', 'callback_data' : 'left'}
+		],
+		[
+			{'text' : 'option_3', 'callback_data' : 'up'}
+		]
+	]
+
+	reply_markup_dict = {'inline_keyboard' : keyboard_array}
+	reply_markup_json = json.dumps({'inline_keyboard' : keyboard_array}, separators=(',', ':'))
+
+	# print('reply_markup.inline_keyboard / type : ', type(reply_markup))
+	# pprint(reply_markup.inline_keyboard)
+
 	data = {"chat_id": chat_id, "text": reply}
-	requests.post(reply_url, data = data)
+	data_s = {"chat_id": chat_id, "text": reply, "reply_markup" : reply_markup_json}
+
+	# print('\n data :')
+	# pprint(data)
+
+	# print('\n data_s :')
+	# pprint(data_s)
+
+	# r = requests.post(reply_url, data = data)
+	r = requests.post(reply_url, data = data_s)
+
+	print(' Response : (utils.py) ', type(r))
+	print(r.json())

@@ -20,7 +20,7 @@ class TelegramWebhook(APIView):
 		print(request.data)
 		process_telegram_message(request.data)
 		# send_telegram_reply.delay(request.data)
-		return Response({"succes": True})
+		return Response({"success": True})
 
 	# def post(self, request):
 	# 	print(request.data)
