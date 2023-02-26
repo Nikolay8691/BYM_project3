@@ -64,6 +64,7 @@ def process_test_question():
 
 	global test_id
 	global test_result_id
+	# test_id = request.session['test_id']
 
 	test = Tests.objects.get(pk = test_id)
 	direction = test.direction
@@ -74,7 +75,9 @@ def process_test_question():
 
 	test_result = TestResult(test = test, word = word_data, tries = 0, status = False)
 	test_result.save()
+	
 	test_result_id = test_result.id
+	# request.session['test_result_id'] = test_result.id
 
 	print(' process_test_question : ')
 	print(' test_id : ', test_id)
@@ -95,6 +98,8 @@ def process_test_answer(message):
 
 	global test_id
 	global test_result_id
+	# test_id = request.session['test_id']
+	# test_result_id = request.session['test_result_id']
 
 	test = Tests.objects.get(pk = test_id)
 	direction = test.direction
@@ -153,6 +158,8 @@ def process_test_results():
 
 	global test_id
 	global test_result_id
+	# test_id = request.session['test_id']
+	# test_result_id = request.session['test_result_id']
 
 	test = Tests.objects.get(pk = test_id)
 	test_results_all = test.test_origin.all()
@@ -168,6 +175,9 @@ def process_test_results():
 
 def process_callbackquery(message):
 	global test_id
+	# if 'test_id' not in request.session:
+	# 	request.session['test_id'] = 0
+	# test_id = request.session['test_id']		
 
 	message_body = message["callback_query"]["message"]
 	chat_id = message_body["chat"]["id"]
@@ -229,6 +239,8 @@ def process_callbackquery(message):
 		test.save()
 		# question = process_test_question(test.id)
 		test_id = test.id
+		# request.session['test_id'] = test.id
+
 		question = process_test_question()
 
 		return {"chat_id": chat_id, "text": question}
