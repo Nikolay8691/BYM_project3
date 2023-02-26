@@ -18,8 +18,12 @@ languages_choose_from = {
 						'ko' : 'korea'
 					}
 
-test_id = 0
-test_result_id = 0
+# test_id = 0
+# test_result_id = 0
+user_4test_2ids ={}
+
+print(' translate.py : user_4test_2ids ')
+pprint(user_4test_2ids)
 
 # def get_translation(sentence) -> tuple:
 
@@ -60,11 +64,12 @@ def get_translation(sentence) -> dict:
 	return reply
 
 # def process_test_question(test_id):
-def process_test_question():
+def process_test_question(user_id):
 
-	global test_id
-	global test_result_id
-	# test_id = request.session['test_id']
+	# global test_id
+	# global test_result_id
+	global user_4test_2ids
+	test_id = user_4test_2ids[user_id]['test_id']
 
 	test = Tests.objects.get(pk = test_id)
 	direction = test.direction
@@ -77,11 +82,13 @@ def process_test_question():
 	test_result.save()
 	
 	test_result_id = test_result.id
-	# request.session['test_result_id'] = test_result.id
+	user_4test_2ids[user_id]['test_result_id'] = test_result_id
 
-	print(' process_test_question : ')
-	print(' test_id : ', test_id)
-	print(' test_result_id : ', test_result_id)
+	print('\n process_test_question : ')
+	print(' user_4test_2ids[user_id] : ')
+	pprint(user_4test_2ids[user_id])
+	# print(' test_id : ', test_id)
+	# print(' test_result_id : ', test_result_id)
 
 	if direction == 'forward':			
 		question = f"{word_data.word_original} - ?({languages_choose_from[word_data.target_language]}ksi)\nStart your answer with '*', like *hello"
@@ -96,10 +103,16 @@ def process_test_question():
 
 def process_test_answer(message):
 
-	global test_id
-	global test_result_id
-	# test_id = request.session['test_id']
-	# test_result_id = request.session['test_result_id']
+	# global test_id
+	# global test_result_id
+	global user_4test_2ids
+
+	user_id = str(message["message"]["from"]["id"])
+	test_id = user_4test_2ids[user_id]['test_id']
+	test_result_id = user_4test_2ids[user_id]['test_result_id']
+
+	print('\n process_test_answer ( user_4test_2ids) :')
+	pprint(user_4test_2ids)
 
 	test = Tests.objects.get(pk = test_id)
 	direction = test.direction
@@ -154,12 +167,13 @@ def process_test_answer(message):
 
 	# return{"chat_id": chat_id, "text": 'everything is okay'}
 
-def process_test_results():
+def process_test_results(user_id):
 
-	global test_id
-	global test_result_id
-	# test_id = request.session['test_id']
-	# test_result_id = request.session['test_result_id']
+	# global test_id
+	# global test_result_id
+	global user_4test_2ids
+	test_id = user_4test_2ids[user_id]['test_id']
+	test_result_id = user_4test_2ids[user_id]['test_result_id']
 
 	test = Tests.objects.get(pk = test_id)
 	test_results_all = test.test_origin.all()
@@ -174,10 +188,11 @@ def process_test_results():
 	return reply_stats
 
 def process_callbackquery(message):
-	global test_id
-	# if 'test_id' not in request.session:
-	# 	request.session['test_id'] = 0
-	# test_id = request.session['test_id']		
+	# global test_id
+	global user_4test_2ids
+
+	print('\n callback_query p1 : user_4test_2ids')
+	pprint(user_4test_2ids)
 
 	message_body = message["callback_query"]["message"]
 	chat_id = message_body["chat"]["id"]
@@ -187,6 +202,11 @@ def process_callbackquery(message):
 	pprint(message['callback_query'])
 	user_id = str(message["callback_query"]["from"]["id"])
 	user_first_name = message["callback_query"]["from"]["first_name"]
+
+	if user_4test_2ids == {}:
+		user_4test_2ids[user_id] = {}
+	print('\n callback_query p2 : user_4test_2ids')
+	pprint(user_4test_2ids)
 
 	process, *data = message["callback_query"]["data"].split(':')
 	# print(' data : ')
@@ -218,11 +238,11 @@ def process_callbackquery(message):
 		return {"chat_id": chat_id, "text": question}
 
 	elif process == 'test_next_word':
-		question = process_test_question()
+		question = process_test_question(user_id)
 		return {"chat_id": chat_id, "text": question}
 
 	elif process == 'test_stop':
-		test_result_stats = process_test_results()
+		test_result_stats = process_test_results(user_id)
 		return {"chat_id": chat_id, "text": test_result_stats}
 
 	else:
@@ -239,9 +259,11 @@ def process_callbackquery(message):
 		test.save()
 		# question = process_test_question(test.id)
 		test_id = test.id
-		# request.session['test_id'] = test.id
+		user_4test_2ids[user_id]['test_id'] = test_id
+		print('\n callback_query p3 : user_4test_2ids')
+		pprint(user_4test_2ids)
 
-		question = process_test_question()
+		question = process_test_question(user_id)
 
 		return {"chat_id": chat_id, "text": question}
 
