@@ -17,6 +17,7 @@ class TelegramWebhook(APIView):
 				{"error": "unauthorized"}, status=status.HTTP_401_UNAUTHORIZED
 				)
 
+		print(' request.data (TelegramWebhook_view) :')
 		print(request.data)
 		process_telegram_message(request.data)
 		# send_telegram_reply.delay(request.data)

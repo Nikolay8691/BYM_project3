@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     # 
     'webhooks',
     'chat',
+    'translation_api',
     # 
     'django.contrib.admin',
     'django.contrib.auth',
