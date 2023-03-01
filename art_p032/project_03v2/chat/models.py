@@ -40,4 +40,4 @@ class TestResult(models.Model):
 	status = models.BooleanField()
 
 	def __str__(self):
-		return f'test_id : {self.test.id}, word : {self.word.word_original}/{self.test.direction} {self.status}:{self.tries}'
+		return f'test_id : {self.test.id}, word : {self.word.word_original}->{self.test.direction} {self.status}:{self.tries}'

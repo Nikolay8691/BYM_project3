@@ -8,22 +8,29 @@ from .models import TelegramMessage, NewWords, Tests, TestResult
 
 from translation_api.get_dictionary_translation import get_google
 
+# languages_choose_from = {
+# 						'es' : 'espana', 
+# 						'fr' : 'ranska', 
+# 						'it' : 'italia', 
+# 						'de' : 'saksa', 
+# 						'fi' : 'suomi', 
+# 						'ru' : 'venäjä', 
+# 						'ko' : 'korea'
+# 					}
+
 languages_choose_from = {
-						'es' : 'espana', 
-						'fr' : 'ranska', 
-						'it' : 'italia', 
-						'de' : 'saksa', 
-						'fi' : 'suomi', 
-						'ru' : 'venäjä', 
-						'ko' : 'korea'
+						'es' : 'spanish', 
+						'fr' : 'french', 
+						'it' : 'italian', 
+						'de' : 'german', 
+						'fi' : 'finnish', 
+						'ru' : 'russian', 
+						'ko' : 'korean'
 					}
 
 # test_id = 0
 # test_result_id = 0
 user_4test_2ids ={}
-
-print(' translate.py : user_4test_2ids ')
-pprint(user_4test_2ids)
 
 # def get_translation(sentence) -> tuple:
 
@@ -40,22 +47,40 @@ pprint(user_4test_2ids)
 
 # 	return (reply, reply_status)
 
+# def get_translation(sentence) -> dict:
+
+# 	reply = {}
+# 	# se = ''
+# 	if sentence[0] == 'fi':
+# 		se = input(f' translate : {sentence[1]} - ')
+# 		# se = get_google(sentence[1], 'fi')
+# 		reply['status'] = True
+# 		reply['text'] = f'you wrote - {sentence[1]}. In finnish it is {se}'
+# 		# reply['text'] = f'sinä kirjoitit - {sentence[1]}. suomeksi se on {se}'
+
+# 	else:
+# 		se = 'no_translation'
+# 		times = random.randint(1, 10)
+# 		reply['status'] = not(times == 1)
+# 		reply['text'] = f'you wrote - {sentence[1]}. in {languages_choose_from[sentence[0]]} it is ... do not know yet.\n just try {times} times more and you will know!'
+# 		# reply['text'] = f'sinä kirjoitit - {sentence[1]}. {languages_choose_from[sentence[0]]}ksi se on ... en tiedä vielä.\n just try {times} times more and you will know!'
+
+# 	reply['word_original'] = sentence[1]
+# 	reply['word_translation'] = se
+# 	reply['source_language'] = 'en'
+# 	reply['target_language'] = sentence[0]
+
+# 	return reply
+
 def get_translation(sentence) -> dict:
 
 	reply = {}
-	# se = ''
-	if sentence[0] == 'fi':
-		se = input(f' translate : {sentence[1]} - ')
-		# se = get_google(sentence[1], 'fi')
-		reply['status'] = True
-		reply['text'] = f'sinä kirjoitit - {sentence[1]}. suomeksi se on {se}'
 
-	else:
-		se = 'no_translation'
-		times = random.randint(1, 10)
-		reply['status'] = not(times == 1)
-		reply['text'] = f'sinä kirjoitit - {sentence[1]}. {languages_choose_from[sentence[0]]}ksi se on ... en tiedä vielä.\n just try {times} times more and you will know!'
-
+	# se = input(f'what is it - {sentence[1]} in {languages_choose_from[sentence[0]]}? : ')
+	se = get_google(sentence[1], sentence[0])
+	
+	reply['text'] = f'you wrote - {sentence[1]}. In {languages_choose_from[sentence[0]]} it is {se}'
+	reply['status'] = True
 	reply['word_original'] = sentence[1]
 	reply['word_translation'] = se
 	reply['source_language'] = 'en'
@@ -63,7 +88,6 @@ def get_translation(sentence) -> dict:
 
 	return reply
 
-# def process_test_question(test_id):
 def process_test_question(user_id):
 
 	# global test_id
@@ -75,7 +99,6 @@ def process_test_question(user_id):
 	direction = test.direction
 	user_words = NewWords.objects.filter(user = test.user)
 	user_language_words = user_words.filter(target_language = test.target_language)
-	print(' direction : ', direction, ' language : ', test.target_language)
 	word_data = random.choice(user_language_words)
 
 	test_result = TestResult(test = test, word = word_data, tries = 0, status = False)
@@ -85,16 +108,18 @@ def process_test_question(user_id):
 	user_4test_2ids[user_id]['test_result_id'] = test_result_id
 
 	print('\n process_test_question : ')
-	print(' user_4test_2ids[user_id] : ')
-	pprint(user_4test_2ids[user_id])
+	# print(' user_4test_2ids[user_id] : ')
+	# pprint(user_4test_2ids[user_id])
 	# print(' test_id : ', test_id)
 	# print(' test_result_id : ', test_result_id)
 
 	if direction == 'forward':			
-		question = f"{word_data.word_original} - ?({languages_choose_from[word_data.target_language]}ksi)\nStart your answer with '*', like *hello"
+		question = f"{word_data.word_original} - ?(in {languages_choose_from[word_data.target_language]})\nStart your answer with '*', like *hello"
+		# question = f"{word_data.word_original} - ?({languages_choose_from[word_data.target_language]}ksi)\nStart your answer with '*', like *hello"
 
 	elif direction == 'backward':
-		question = f"{word_data.word_translation} - ?(englanniksi)\nStart your answer with '*', like *hello"
+		question = f"{word_data.word_translation} - ?(in english)\nStart your answer with <b>'*'</b>, like <b>*hello</b>"
+		# question = f"{word_data.word_translation} - ?(englanniksi)\nStart your answer with '*', like *hello"
 
 	else:
 		question = f"Smth. is wrong with direction"
@@ -111,8 +136,9 @@ def process_test_answer(message):
 	test_id = user_4test_2ids[user_id]['test_id']
 	test_result_id = user_4test_2ids[user_id]['test_result_id']
 
-	print('\n process_test_answer ( user_4test_2ids) :')
-	pprint(user_4test_2ids)
+	print('\n process_test_answer :')
+	# print('( user_4test_2ids) :')
+	# pprint(user_4test_2ids)
 
 	test = Tests.objects.get(pk = test_id)
 	direction = test.direction
@@ -138,25 +164,21 @@ def process_test_answer(message):
 
 	if word_answer == right_answer:
 		test_result.status = True
-		answer = 'correct. congratulations'
+		answer = 'correct, congratulations!'
 
 	elif test_result.tries < 2:
-		# test_result.tries += 1
-		# test_result.status = False
 		answer = 'mistake. you can try 1 more time'
 		callback_data = f'test_repeat:{direction}:{language}:{word_questioned}'
-		keyboard_row = [{'text' : ' Try 1 more time ', 'callback_data' : callback_data}]
+		keyboard_row = [{'text' : ' try 1 more time - no doubts!', 'callback_data' : callback_data}]
 		keyboard_array.append(keyboard_row)
 
 	else:
-		# test_result.status = False
 		answer = f'mistake. right_answer = {right_answer} '
-
 	test_result.save()
 
 	keyboard_row = [
-					{'text' : ' next word', 'callback_data' : 'test_next_word:'},
-					{'text' : ' stop test ', 'callback_data' : 'test_stop'}
+					{'text' : ' go -> next word ', 'callback_data' : 'test_next_word:'},
+					{'text' : ' stop test -> stats ', 'callback_data' : 'test_stop'}
 					]
 	keyboard_array.append(keyboard_row)
 
@@ -187,59 +209,61 @@ def process_test_results(user_id):
 	reply_stats = f'tested dictionary consists of {test.number_of_words}\n tested {j} words in {i} tries\n correct {k}, wrong {j-k}'
 	return reply_stats
 
+
 def process_callbackquery(message):
+
 	# global test_id
 	global user_4test_2ids
 
-	print('\n callback_query p1 : user_4test_2ids')
-	pprint(user_4test_2ids)
+	print('\n process callback_query : ')
+	pprint(message['callback_query'])
 
 	message_body = message["callback_query"]["message"]
 	chat_id = message_body["chat"]["id"]
 	word = message_body["text"]
 
-	print(' callback_query : ', type(message['callback_query']))
-	pprint(message['callback_query'])
 	user_id = str(message["callback_query"]["from"]["id"])
 	user_first_name = message["callback_query"]["from"]["first_name"]
 
 	if user_4test_2ids == {}:
 		user_4test_2ids[user_id] = {}
-	print('\n callback_query p2 : user_4test_2ids')
-	pprint(user_4test_2ids)
 
 	process, *data = message["callback_query"]["data"].split(':')
-	# print(' data : ')
-	# print(data)
-	# print('process : ', process)
 
 	if process == 'text_message':
 		# store in FDB
 
 		source_language, word_original, target_language, word_translation = data
-		f = NewWords(
-					source_language = source_language, 
-					word_original = word_original, 
-					target_language = target_language, 
-					word_translation = word_translation, 
-					user = user_id,
-					user_first_name = user_first_name
-					)
-		f.save()
 
-		reply = f"Okay, {word_original} with {word_translation} is in FDB now"
+		x = len(NewWords.objects.filter(user = user_id, word_original = word_original, target_language = target_language))
+		if not x:
+			f = NewWords(
+						source_language = source_language, 
+						word_original = word_original, 
+						target_language = target_language, 
+						word_translation = word_translation, 
+						user = user_id,
+						user_first_name = user_first_name
+						)
+			f.save()
+			reply = f"Okay, {word_original} & {word_translation} is in FDB now"
+		else:
+			reply = f"Okay, {word_original} & {word_translation} is in FDB already"
+
 		return {"chat_id": chat_id, "text": reply}
 
 	elif process == 'test_repeat':
 		# test - 2nd try
 		direction, language, word_questioned = data
-		question = f"{word_questioned} - ?({language}ksi)\nStart your answer with '*', like *hello\nLast try!"
+		question = f"{word_questioned} - ?({language}ksi)\nStart your answer with <b>'*'</b>, like <b>*hello</b>\nLast try!"
 
-		return {"chat_id": chat_id, "text": question}
+		# return {"chat_id": chat_id, "text": question}
+		return {"chat_id": chat_id, "text": question, 'parse_mode' : 'HTML'}
 
 	elif process == 'test_next_word':
 		question = process_test_question(user_id)
-		return {"chat_id": chat_id, "text": question}
+		# return {"chat_id": chat_id, "text": question}
+		return {"chat_id": chat_id, "text": question, 'parse_mode' : 'HTML'}
 
 	elif process == 'test_stop':
 		test_result_stats = process_test_results(user_id)
@@ -257,18 +281,20 @@ def process_callbackquery(message):
 						number_of_words = number
 					)
 		test.save()
-		# question = process_test_question(test.id)
+
 		test_id = test.id
 		user_4test_2ids[user_id]['test_id'] = test_id
-		print('\n callback_query p3 : user_4test_2ids')
-		pprint(user_4test_2ids)
 
 		question = process_test_question(user_id)
 
-		return {"chat_id": chat_id, "text": question}
+		# return {"chat_id": chat_id, "text": question}
+		return {"chat_id": chat_id, "text": question, 'parse_mode' : 'HTML'}
 
 
 def process_command(message):
+
+	print(' process = command : ', type(message['message']))
+	pprint(message['message'])
 
 	text = message["message"]["text"]
 	chat_id = message["message"]["chat"]["id"]
@@ -280,21 +306,20 @@ def process_command(message):
 	elif text == "/newwords":
 		languages = ",\n".join(f'   {code} : {language}' for code, language in sorted(languages_choose_from.items()))
 		languages_list_title = "languages to choose from "
-		invitation = "\ntype the word you want to know, like\nlanguage_code: new_word (ex. de: hello)"
+		invitation = "\ntype the word you want to know, like\nlanguage_code: new_word (ex. <b>de: hello</b>)"
 		reply = f"{languages_list_title} :\n{languages}\nwelcome to '{text.lstrip('/')}' study : {invitation}"
-		return {"chat_id": chat_id, "text": reply}
+
+		# return {"chat_id": chat_id, "text": reply}
+		return {"chat_id": chat_id, "text": reply, 'parse_mode' : 'HTML'}
 
 	elif text == "/newtest":
-
-		print(' message = command : ', type(message['message']))
-		print(message['message'])
 
 		user_id = message["message"]["from"]["id"]
 		user_first_name = message["message"]["from"]["first_name"]
 
 		user_words = NewWords.objects.filter(user = user_id)
 
-		user_dict = {}
+		user_dict = {} # number of languages studied
 		n = 0		
 		for word in user_words:
 			language = word.target_language
@@ -304,7 +329,6 @@ def process_command(message):
 			else:
 				user_dict[language] += 1
 
-		# reply_text = f"welcome to {text.lstrip('/')} exercise :\n you study {n} language(s) - choose test button"
 		# reply = f"welcome to {text.lstrip('/')} exercise :\n its' logic is not ready yet. "
 
 		if n > 0:
@@ -329,12 +353,11 @@ def process_command(message):
 			reply_text = f"welcome to {text.lstrip('/')} exercise :\n you study {n} language(s) - choose test button"
 			reply_markup_json = json.dumps({'inline_keyboard' : keyboard_array}, separators=(',', ':'))
 
-			print(reply_text)
+			print(' reply_text = command : ', reply_text)
 			print(' reply_markup_json = command : ')
 			pprint(reply_markup_json)
 
 			return {"chat_id": chat_id, "text": reply_text, "reply_markup" : reply_markup_json}
-			# reply = f'I am glad you are here'
 
 		else:
 			reply = f'you do not study any language yet.\n /newwords is the right choice for you'
@@ -354,7 +377,10 @@ def process_text_message(message):
 	chat_id = message["message"]["chat"]["id"]
 
 	words = text.split(' ')
-	language = words[0].lower().rstrip(':')
+	if words[0][-1] == ':':
+		language = words[0].lower().rstrip(':')
+	else:
+		language = 'error'
 
 	if len(words) > 1 and (language in languages_choose_from):
 
@@ -381,8 +407,8 @@ def process_text_message(message):
 			return {"chat_id": chat_id, "text": reply}
 
 	else:
-		reply = 'Invalid command - check the message inputs :\nfor newwords send like - de: girl - to translate girl to german\nfor test send like - *word_answer - to compare with right_answer'
-		# reply = 'Invalid command - check the message and/or language code. Send like - de: girl - to translate girl to german'
-		return {"chat_id": chat_id, "text": reply}
+		reply = 'Invalid command - check the message inputs :\nfor <b>newwords</b> send like - <b>de: girl</b> - to translate girl to german\nfor <b>test</b> send answer like - <b>*word</b> - to compare with right_answer'
+		# return {"chat_id": chat_id, "text": reply}
+		return {"chat_id": chat_id, "text": reply, 'parse_mode' : 'HTML'}
 
 	# reply = f"hei {name}! Oon saannut viestasi {text}"
